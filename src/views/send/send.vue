@@ -131,7 +131,7 @@
 	export default{
 		data(){
 			return {
-				src:"../../../static/img/shoujimoban.png",
+				src:"../static/img/shoujimoban.png",
 				ad:true
 			}
 		},
