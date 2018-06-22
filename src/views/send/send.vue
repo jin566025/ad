@@ -7,17 +7,17 @@
 					<p class="top-p">
 						<span class="xing">*</span>
 						<span class="name">区域选择：</span>
-						<select class="selects">
+						<select class="selects" @change="selectProvince($event)">
 							<option class="hide">省</option>
-							<option>浙江省</option>
+							<option :value="item.areaId" v-for="(item,index) in province">{{ item.areaName }}</option>
 						</select>
-						<select class="selects">
+						<select class="selects" @change="selectCity($event)">
 							<option class="hide">市</option>
-							<option>宁波市</option>
+							<option :value="item.areaId" v-for="(item,index) in city">{{ item.areaName }}</option>
 						</select>
-						<select class="selects">
+						<select class="selects" >
 							<option class="hide">区</option>
-							<option>海曙区</option>
+							<option :value="item.areaId" v-for="(item,index) in area">{{ item.areaName }}</option>
 						</select>
 					</p>
 					
@@ -132,8 +132,17 @@
 		data(){
 			return {
 				src:"../static/img/shoujimoban.png",
-				ad:true
+				ad:true,
+				province:[],
+				city:[],
+				area:[]
 			}
+		},
+		mounted(){
+			this.$nextTick(function(){
+				this.queryArea("");
+				this.querySite();
+			})
 		},
 		methods:{
 			getFile (e) {
@@ -145,11 +154,70 @@
 		        reader.onloadend = function () {
 		          _this.src = this.result
 		        }
-		   },
-		   toPay:function(){
-		   	  this.$router.push({'path':'pay'})
-		   }
-
+		    },
+		    toPay:function(){
+		   	   this.$router.push({'path':'pay'})
+		    },
+		    queryArea:function(areaId){
+		    	var dataArray = {};
+		    	if(areaId){
+		    		dataArray.areaId = areaId
+		    	}
+		   		this.$ajax({
+		   			type:"post",
+					url:"/api/queryArea.json",
+					params:dataArray,
+					dataType:"json"
+		   		}).then((res)=>{
+		   			if(res.data.stateCode===0){
+		   				let list =  res.data.areaList;
+			   			if(areaId===""){
+			   				this.province = list;
+			   			}else{
+			   				this.city = list;
+			   			}
+		   			}
+		   		})
+		    },
+		    selectProvince:function(event){
+		    	var areaId = event.target.value;
+		    	this.area = [];
+		    	this.city = [];
+		    	this.queryArea(areaId);
+		    },
+		    selectCity:function(event){
+		    	var areaId = event.target.value;
+		    	this.area = [];
+		    	this.$ajax({
+		   			type:"post",
+					url:"/api/queryArea.json",
+					params:{
+						"areaId":areaId
+					},
+					dataType:"json"
+		   		}).then((res)=>{
+		   			if(res.data.stateCode===0){
+		   				
+		   				let list =  res.data.areaList;
+			   			this.area = list;
+		   			}
+		   		})
+		    },
+		    querySite:function(){
+		    	this.$ajax({
+		   			type:"post",
+					url:"/api/queryArea.json",
+					params:{
+						"adminId":0,
+						"type":"小区",
+						"pageNo":1,
+						"pageSize":20
+					},
+					dataType:"json"
+		   		}).then((res)=>{
+		   			console.log(res);
+		   		})
+		    }
 		}
 	}
 </script>
@@ -177,7 +245,7 @@
 					.link-input{width: 200px;height: 30px;font-family: Microsoft Yahei;font-size: 12px;color: #969696 ;border: 1px solid #DCDCDC;padding-left: 5px;border-radius: 5px;}
 					.moban{width: 200px;}
 					.input-file{opacity: 0;height: 30px;width: 110px;cursor: pointer;}
-					.upimg{position: absolute;bottom: 0;width: 110px;height: 30px;left:100px;z-index: -1;cursor: pointer;}
+					.upimg{position: absolute;bottom: 0;width: 110px;height: 30px;left:105px;z-index: -1;cursor: pointer;}
 					.tips{font-size: 12px;font-family: Roboto;color: #323232 ;}
 					.type{font-family: Roboto;font-size: 12px;margin-left: 10px;}
 				}

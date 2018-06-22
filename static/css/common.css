@@ -1,4 +1,4 @@
-body,html{font-size: 12px;font-family: "微软雅黑";height: 100vh;box-sizing:border-box;}
+body,html{font-size: 12px;font-family: "微软雅黑";height: 100vh;box-sizing:border-box;width: 100%;min-width: 1440px;}
 body,h1,h2,h3,h4,h5,h6,hr,p,blockquote,dl,dt,dd,ul,ol,li,pre,
 form,fieldset,legend,button,input,textarea,th,td ,div {margin:0;padding:0;}
 

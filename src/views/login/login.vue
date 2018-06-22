@@ -1,8 +1,9 @@
 <template>
 	<div class="container">
+		<loading></loading>
 		<div class="main">
 			<div class="content clearfix">
-				<img class="banner fl" src="../../../static/img/login-banner.png" />
+				<img class="banner fl"    src="../../../static/img/login-banner.png" />
 				<div class="login fl" v-if="login1">
 					<div class="login-content clearfix">
 						<p  class="login-title fl">广告商登录</p>
@@ -19,10 +20,13 @@
 						</div>
 					</div>
 					<div class="group clearfix">
-						<p class="group-title">验证码</p>
+						<p class="group-title">
+							<span>验证码</span>
+							<span class="noinput" v-show="noMsg">请输入正确的验证码!</span>
+						</p>
 						<div class="group-input2 clearfix fl">
 							<div class="group-input-left fl"></div>
-							<input class="group-input-right fr" />
+							<input v-model="msg" class="group-input-right fr" />
 						</div>
 						<div class="send fr" ref="times" :class="{djs:djs}" @click="sendMsg()">点击发送验证码</div>
 					</div>
@@ -47,7 +51,7 @@
 							<input class="group-input-right group-input-right3 fr" />
 						</div>
 					</div>
-					<div class="login-btn login-btn2" @click="login()">登录</div>
+					<div class="login-btn login-btn2">登录</div>
 				</div>
 			</div>
 		</div>
@@ -55,31 +59,115 @@
 </template>
 
 <script>
+	import Loading from '@/components/loading'
 	export default{
 		data(){
 			return {
 				login1:false,
 				mobile:"",
+				msg:"",
+				noMsg:false,
 				noMobile:false,
 				djs:false,//倒计时
 			}
+		},
+		components:{
+			Loading
 		},
 		methods:{
 			change:function(){
 				this.login1 = !this.login1
 			},
-			login:function(){
-				this.$router.push({'path':"/"})
-			},
-			sendMsg:function(){
-				let mobile = this.mobile;
+			testMobile:function(m){
 				var reg=11 && /^((13|14|15|17|18)[0-9]{1}\d{8})$/;
-
-				if(reg.test(this.mobile)){
+				return reg.test(m)
+			},
+			login:function(){
+				
+				let mobile = this.mobile;
+				let hasMobile = this.testMobile(mobile);
+				if(hasMobile){
+					this.noMobile = false;
+				}else{
+					this.noMobile = true;
+					return false;
+				}
+				
+				let msg = this.msg;
+				if(msg){
+					this.noMsg = false;
+				}else{
+					this.noMsg = true;
+					return false;
+				}
+				
+				this.$ajax({
+					type:"post",
+					url:"/api/mall/user/userLogin.json",
+					params:{
+						"phone":mobile,
+						"code":msg,
+						"loginType":1,
+						"agentsId":0
+					},
+					dataType:"json"
+				}).then((res)=>{
+					if(res.data.stateCode===0){
+						let data = res.data;
+						let cityId = data.cityId;
+						let cityName = data.cityName;
+						let districtId = data.districtId;
+						let districtName = data.districtName;
+						let money = data.money;
+						let provinceId = data.provinceId;
+						let provinceName = data.provinceName;
+						let userId = data.userId;
+						let hasDoor = data.hasDoor;
+						let hasLight = data.hasLight;
+						let userInfo = {};
+						
+						userInfo.cityId = cityId;
+						userInfo.cityName = cityName;
+						userInfo.districtId = districtId;
+						userInfo.districtName = districtName;
+						userInfo.money = money;
+						userInfo.provinceId = provinceId;
+						userInfo.provinceName = provinceName;
+						userInfo.userId = userId;
+						userInfo.hasDoor = hasDoor;
+						userInfo.hasLight = hasLight;
+						
+						userInfo = JSON.stringify(userInfo);
+						sessionStorage.setItem("userInfo",userInfo);
+						
+						this.$router.push({'path':"/"})
+					}
+				})
+				
+			},
+			
+			sendMsg:function(){
+				console.log("aaa")
+				let mobile = this.mobile;
+				if(this.testMobile(mobile)){
 					this.noMobile = false;
 					this.djs = true;
-					let time = 5;
+					let time = 60;
 					let times = this.$refs.times;
+					
+					this.$ajax({
+						type:"post",
+						url:"/api/mall/user/getLoginSMS.json",
+						params:{
+							"phone":mobile
+						},
+						dataType:"json"
+					}).then((res)=>{
+						if(res.data.stateCode===0){
+							console.log(res)
+						}
+					})
+					
 					let interval = setInterval(()=>{
 						time = time-1;
 						if(time>0){

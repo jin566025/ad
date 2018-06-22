@@ -33,7 +33,17 @@ module.exports = {
     // https://vue-loader.vuejs.org/en/options.html#cachebusting
     cacheBusting: true,
 
-    cssSourceMap: true
+    cssSourceMap: true,
+    proxyTable: {  
+        '/api': {  
+            target: 'http://101.37.163.225:8888/JKMarket/rest',  
+            changeOrigin: true,  
+            pathRewrite: {  
+                '^/api': '/'  
+                }  
+            }  
+  
+        }
   },
 
   build: {
