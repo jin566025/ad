@@ -41,7 +41,9 @@ export default new Router({
 	        component: () => import('@/views/pay/pay'),
 	        meta: { title: 'pay'}
 	    	}
+	    	
 	    ]
-    }
+    },
+    {path: '/404',component:() => import('@/views/404/404'),hidden: true},
   ]
 })

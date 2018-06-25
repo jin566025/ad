@@ -135,13 +135,14 @@
 				ad:true,
 				province:[],
 				city:[],
-				area:[]
+				area:[],
+				site:[]
 			}
 		},
 		mounted(){
 			this.$nextTick(function(){
 				this.queryArea("");
-				this.querySite();
+				//this.querySite();
 			})
 		},
 		methods:{
@@ -165,7 +166,7 @@
 		    	}
 		   		this.$ajax({
 		   			type:"post",
-					url:"/api/queryArea.json",
+					url:this.url_path+"/queryArea.json",
 					params:dataArray,
 					dataType:"json"
 		   		}).then((res)=>{
@@ -190,7 +191,7 @@
 		    	this.area = [];
 		    	this.$ajax({
 		   			type:"post",
-					url:"/api/queryArea.json",
+					url:this.url_path+"/queryArea.json",
 					params:{
 						"areaId":areaId
 					},
@@ -206,7 +207,7 @@
 		    querySite:function(){
 		    	this.$ajax({
 		   			type:"post",
-					url:"/api/queryArea.json",
+					url:this.url_path+"/queryArea.json",
 					params:{
 						"adminId":0,
 						"type":"小区",
@@ -215,7 +216,10 @@
 					},
 					dataType:"json"
 		   		}).then((res)=>{
-		   			console.log(res);
+		   			if(res.data.stateCode===0){
+		   				let list =  res.data.areaList;
+			   			this.site = list;
+		   			}
 		   		})
 		    }
 		}

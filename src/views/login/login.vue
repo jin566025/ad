@@ -103,7 +103,7 @@
 				
 				this.$ajax({
 					type:"post",
-					url:"/api/mall/user/userLogin.json",
+					url:this.url_path+"/mall/user/userLogin.json",
 					params:{
 						"phone":mobile,
 						"code":msg,
@@ -112,6 +112,7 @@
 					},
 					dataType:"json"
 				}).then((res)=>{
+					console.log(res)
 					if(res.data.stateCode===0){
 						let data = res.data;
 						let cityId = data.cityId;
@@ -157,7 +158,7 @@
 					
 					this.$ajax({
 						type:"post",
-						url:"/api/mall/user/getLoginSMS.json",
+						url:this.url_path+"/mall/user/getLoginSMS.json",
 						params:{
 							"phone":mobile
 						},

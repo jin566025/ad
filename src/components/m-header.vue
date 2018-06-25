@@ -15,7 +15,8 @@
 				this.$router.push({'path':'/'})
 			},
 			logout:function(){
-				this.$router.push({'path':'login'})
+				sessionStorage.removeItem("userInfo");
+				this.$router.push({'path':'login'});
 			}
 		}
 	}
