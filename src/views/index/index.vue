@@ -5,55 +5,30 @@
 			<div class="main">
 				<div class="title">历史红包记录：</div>
 				<div v-if="hasData">
-					<div class="section" @click="toDetail()">
-						<div class="section-title">发布时间：20180615  16:30:24</div>
+					<div class="section" @click="toDetail(item.id,$event)" v-for="item in adList">
+						<div class="section-title">发布时间：没返回</div>
 						<div class="section-content">
-							<p class="section-content-title">浙江省-宁波市-鄞州区-小城花园</p>
+							<p class="section-content-title"><span class="provinceName">{{ item.provinceName }}</span>-<span class="cityName">{{ item.cityName }}</span>-<span class="districtName">{{ item.districtName }}</span>-<span class="siteName">{{ item.siteName }}</span></p>
 							<div class="section-main clearfix">
 								<div class="section-left fl">
-									<p class="section-name">红包名称：xxxxxxxx</p>
+									<p class="section-name">红包名称：<span class="name">{{ item.name }}</span></p>
 									<p class="section-detail">
-										<span>随机部分：100个</span>
-										<span class="section-span">金额：650元</span>
+										<span>随机部分：<a class="randomAmount">{{ item.randomAmount }}</a>个</span>
+										<span class="section-span">金额：<a class="randomMoney">{{ item.randomMoney }}</a>元</span>
 									</p>
 									<p class="section-detail">
-										<span>运气部分：50个</span>
-										<span class="section-span">金额：200元</span>
-										<span class="section-span">概率：20%</span>
+										<span>运气部分：<a class="probabilityAmount">{{ item.probabilityAmount }}</a>个</span>
+										<span class="section-span">金额：<a class="probabilityMoney">{{ item.probabilityMoney }}</a>元</span>
+										<span class="section-span">概率：<a class="probability">{{ item.probability }}</a>%</span>
 									</p>
 									<p class="section-detail">
-										<span>总金额：1000.00元</span>
+										<span>总金额：<a class="count">{{ item.count }}</a>元</span>
+										<span class="img">{{ item.img }}</span>
+										<span class="url">{{ item.url }}</span>
 									</p>
 								</div>
 								<div class="section-right fr">
-									<p class="p-number">120</p>
-									<p class="p-number2">已领取人次</p>
-								</div>
-							</div>
-						</div>
-					</div>
-					<div class="section">
-						<div class="section-title">发布时间：20180615  16:30:24</div>
-						<div class="section-content">
-							<p class="section-content-title">浙江省-宁波市-鄞州区-小城花园</p>
-							<div class="section-main clearfix">
-								<div class="section-left fl">
-									<p class="section-name">红包名称：xxxxxxxx</p>
-									<p class="section-detail">
-										<span>随机部分：100个</span>
-										<span class="section-span">金额：650元</span>
-									</p>
-									<p class="section-detail">
-										<span>运气部分：50个</span>
-										<span class="section-span">金额：200元</span>
-										<span class="section-span">概率：20%</span>
-									</p>
-									<p class="section-detail">
-										<span>总金额：1000.00元</span>
-									</p>
-								</div>
-								<div class="section-right fr">
-									<p class="p-number">120</p>
+									<p class="p-number number">无</p>
 									<p class="p-number2">已领取人次</p>
 								</div>
 							</div>
@@ -78,19 +53,76 @@
 </template>
 
 <script>
+	import { advertiserRedPacket } from '@/api/redpacket'
 	import Banner from '@/components/banner'
 	export default{
 		data(){
 			return {
-				hasData:true
+				hasData:true,
+				adList:[]
 			}
 		},
+		mounted(){
+			this.$nextTick(function(){
+				this.getList();
+			})
+		},
 		methods:{
-			toDetail:function(){
-				this.$router.push({'path':'detail'})
+			toDetail:function(id,event){
+				let target = event.currentTarget;
+				let provinceName = target.getElementsByClassName("provinceName")[0].innerText;
+				let cityName = target.getElementsByClassName("cityName")[0].innerText;
+				let districtName = target.getElementsByClassName("districtName")[0].innerText;
+				let siteName = target.getElementsByClassName("siteName")[0].innerText;
+				let name = target.getElementsByClassName("name")[0].innerText;
+				let randomAmount = target.getElementsByClassName("randomAmount")[0].innerText;
+				let randomMoney = target.getElementsByClassName("randomMoney")[0].innerText;
+				let probabilityAmount = target.getElementsByClassName("probabilityAmount")[0].innerText;
+				let probabilityMoney = target.getElementsByClassName("probabilityMoney")[0].innerText;
+				let probability = target.getElementsByClassName("probability")[0].innerText;
+				let count = target.getElementsByClassName("count")[0].innerText;
+				let img = target.getElementsByClassName("img")[0].innerText;
+				let url = target.getElementsByClassName("url")[0].innerText;
+				let number = target.getElementsByClassName("number")[0].innerText;
+				let dataArray = {
+					provinceName:provinceName,
+					cityName:cityName,
+					districtName:districtName,
+					siteName:siteName,
+					name:name,
+					randomAmount:randomAmount,
+					randomMoney:randomMoney,
+					probabilityAmount:probabilityAmount,
+					probabilityMoney:probabilityMoney,
+					probability:probability,
+					count:count,
+					img:img,
+					url:url,
+					number:number
+				}
+				dataArray = JSON.stringify(dataArray);
+				sessionStorage.setItem("dataArray",dataArray);
+				this.$router.push({'path':'detail?id='+id})
 			},
 			toSend:function(){
 				this.$router.push({'path':'send'})
+			},
+			getList:function(){
+				let userInfo = sessionStorage.getItem("userInfo");
+				userInfo = JSON.parse(userInfo);
+				let userId = userInfo.userId;
+				let params = {};
+				params.userId = userId;
+				advertiserRedPacket(params).then((res)=>{
+					console.log(res)
+					if(res.data.data.list.length==0){
+						this.hasData=false
+					}
+					if(res.data.stateCode==0){
+						this.adList = res.data.data.list;
+					}
+				})
+
 			}
 		},
 		components:{
@@ -100,6 +132,7 @@
 </script>
 
 <style lang="less" rel="stylesheet/less" scoped>
+.img,.url{display: none;}
 .content{
 	width: 1440px;margin: 0 auto;
 	.main{

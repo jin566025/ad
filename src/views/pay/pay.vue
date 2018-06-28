@@ -2,13 +2,42 @@
 	<div class="main">
 		<div class="content">
 			<p class="title">请扫码二维码完成支付：</p>
-			<img class="erweima" src="../../../static/img/erweima.png" />
+			<img class="erweima" :src="img" />
 		</div>
 	</div>
 </template>
 
 <script>
-	
+	import { redPacketPay } from '@/api/redpacket'
+	export default{
+		data(){
+			return {
+				img:""
+			}
+			
+		},
+		mounted(){
+			this.$nextTick(function(){
+				this.getImg();
+			})
+		},
+		methods:{
+			getImg:function(){
+				this.img = sessionStorage.getItem("img");
+				let outSn = sessionStorage.getItem("outSn");
+				let params = {};
+				params.outSn = outSn;
+				redPacketPay(params).then((res)=>{
+					console.log(res);
+					if(res.data.stateCode==0){
+						document.getElementById("app").innerHTML = res.data.aliPayString
+						document.forms[0].submit();
+						
+					}
+				})
+			}
+		}
+	}
 </script>
 
 <style  lang="less" rel="stylesheet/less" scoped>

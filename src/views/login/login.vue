@@ -16,7 +16,7 @@
 						</p>
 						<div class="group-input clearfix">
 							<div class="group-input-left fl"></div>
-							<input class="group-input-right fr" v-model="mobile" />
+							<input @keyup.enter="login" class="group-input-right fr" v-model="mobile" />
 						</div>
 					</div>
 					<div class="group clearfix">
@@ -26,7 +26,7 @@
 						</p>
 						<div class="group-input2 clearfix fl">
 							<div class="group-input-left fl"></div>
-							<input v-model="msg" class="group-input-right fr" />
+							<input @keyup.enter="login" v-model="msg" class="group-input-right fr" />
 						</div>
 						<div class="send fr" ref="times" :class="{djs:djs}" @click="sendMsg()">点击发送验证码</div>
 					</div>
@@ -38,20 +38,26 @@
 						<img  @click="change()" class="login-img fr" src="../../../static/img/login2.png" />
 					</div>
 					<div class="group">
-						<p class="group-title">账号</p>
+						<p class="group-title">
+							<span>账号</span>
+							<span class="noinput" v-show="nousername">{{ usernameTip }}</span>
+						</p>
 						<div class="group-input clearfix">
 							<div class="group-input-left group-input-left3 fl"></div>
-							<input class="group-input-right fr" />
+							<input  @keyup.enter="login2" v-model="username" class="group-input-right fr" />
 						</div>
 					</div>
 					<div class="group">
-						<p class="group-title">密码</p>
+						<p class="group-title">
+							<span>密码</span>
+							<span class="noinput" v-show="nopassword">{{ passwordTip }}</span>
+						</p>
 						<div class="group-input clearfix">
 							<div class="group-input-left group-input-left4 fl"></div>
-							<input class="group-input-right group-input-right3 fr" />
+							<input type="password"  @keyup.enter="login2" v-model="password" class="group-input-right group-input-right3 fr" />
 						</div>
 					</div>
-					<div class="login-btn login-btn2">登录</div>
+					<div class="login-btn login-btn2" @click="login2()">登录</div>
 				</div>
 			</div>
 		</div>
@@ -60,15 +66,23 @@
 
 <script>
 	import Loading from '@/components/loading'
+	import { getMsg,login1,login22 } from '@/api/login'
 	export default{
 		data(){
 			return {
-				login1:false,
-				mobile:"",
-				msg:"",
+				login1:true,       //切换平台登录和广告商登录
+				mobile:"",         //广告商登录手机号
+				msg:"",			   //广告商登录验证码
 				noMsg:false,
 				noMobile:false,
-				djs:false,//倒计时
+				djs:false,         //倒计时
+				username:"",       //平台登录账号
+				password:""	,	   //平台登录密码
+				nousername:false,
+				nopassword:false,
+				usernameTip:"请输入账号",
+				passwordTip:"请输入正确的密码",
+
 			}
 		},
 		components:{
@@ -82,36 +96,29 @@
 				var reg=11 && /^((13|14|15|17|18)[0-9]{1}\d{8})$/;
 				return reg.test(m)
 			},
-			login:function(){
+			login2:function(){
+				let username = this.username;
+				let password = this.password;
 				
-				let mobile = this.mobile;
-				let hasMobile = this.testMobile(mobile);
-				if(hasMobile){
-					this.noMobile = false;
+				if(username){
+					this.nousername = false;
 				}else{
-					this.noMobile = true;
+					this.nousername = true;
 					return false;
 				}
 				
-				let msg = this.msg;
-				if(msg){
-					this.noMsg = false;
+				if(password){
+					this.nopassword = false;
 				}else{
-					this.noMsg = true;
+					this.nopassword = true;
 					return false;
 				}
-				
-				this.$ajax({
-					type:"post",
-					url:this.url_path+"/mall/user/userLogin.json",
-					params:{
-						"phone":mobile,
-						"code":msg,
-						"loginType":1,
-						"agentsId":0
-					},
-					dataType:"json"
-				}).then((res)=>{
+				let params = {
+					longType:1,
+					username:username,
+					password:password
+				}
+				login22(params).then((res)=>{
 					console.log(res)
 					if(res.data.stateCode===0){
 						let data = res.data;
@@ -140,35 +147,96 @@
 						
 						userInfo = JSON.stringify(userInfo);
 						sessionStorage.setItem("userInfo",userInfo);
-						
-						this.$router.push({'path':"/"})
+						sessionStorage.setItem("adtype",1)
+						this.$router.push({'path':"/layout/index"})
+					}else if(res.data.stateCode===202){
+						this.usernameTip = res.data.msg;
+						this.nousername = true;
+					}else if(res.data.stateCode===205){
+						this.passwordTip = res.data.msg;
+						this.nopassword = true;
+					}else if(res.data.stateCode===702){
+						this.usernameTip = res.data.msg;
+						this.nousername = true;
 					}
 				})
 				
 			},
+			login:function(){
+				
+				let mobile = this.mobile;
+				let hasMobile = this.testMobile(mobile);
+				if(hasMobile){
+					this.noMobile = false;
+				}else{
+					this.noMobile = true;
+					return false;
+				}
+				
+				let msg = this.msg;
+				if(msg){
+					this.noMsg = false;
+				}else{
+					this.noMsg = true;
+					return false;
+				}
+				let params = {
+					phone:mobile,
+					code:msg,
+					loginType:1,
+					agentsId:0
+				}
+				login1(params).then((res)=>{
+					console.log(res)
+					if(res.data.stateCode===0){
+						let data = res.data;
+						let cityId = data.cityId;
+						let cityName = data.cityName;
+						let districtId = data.districtId;
+						let districtName = data.districtName;
+						let money = data.money;
+						let provinceId = data.provinceId;
+						let provinceName = data.provinceName;
+						let userId = data.userId;
+						let hasDoor = data.hasDoor;
+						let hasLight = data.hasLight;
+						let userInfo = {};
+						
+						userInfo.cityId = cityId;
+						userInfo.cityName = cityName;
+						userInfo.districtId = districtId;
+						userInfo.districtName = districtName;
+						userInfo.money = money;
+						userInfo.provinceId = provinceId;
+						userInfo.provinceName = provinceName;
+						userInfo.userId = userId;
+						userInfo.hasDoor = hasDoor;
+						userInfo.hasLight = hasLight;
+						
+						userInfo = JSON.stringify(userInfo);
+						sessionStorage.setItem("userInfo",userInfo);
+						sessionStorage.setItem("adtype",0)
+						this.$router.push({'path':"/layout/index"})
+					}else{
+						this.noMsg = true;
+					}
+				})
+				
+				
+			},
 			
 			sendMsg:function(){
-				console.log("aaa")
 				let mobile = this.mobile;
+				let params = {};
 				if(this.testMobile(mobile)){
 					this.noMobile = false;
 					this.djs = true;
 					let time = 60;
 					let times = this.$refs.times;
-					
-					this.$ajax({
-						type:"post",
-						url:this.url_path+"/mall/user/getLoginSMS.json",
-						params:{
-							"phone":mobile
-						},
-						dataType:"json"
-					}).then((res)=>{
-						if(res.data.stateCode===0){
-							console.log(res)
-						}
+					params.phone = mobile;
+					getMsg(params).then((res)=>{
+						console.log(res)
 					})
-					
 					let interval = setInterval(()=>{
 						time = time-1;
 						if(time>0){

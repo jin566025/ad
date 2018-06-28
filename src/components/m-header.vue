@@ -12,11 +12,12 @@
 	export default{
 		methods:{
 			toIndex:function(){
-				this.$router.push({'path':'/'})
+				this.$router.push({'path':'/layout/index'})
 			},
 			logout:function(){
 				sessionStorage.removeItem("userInfo");
-				this.$router.push({'path':'login'});
+				this.$router.push({'path':'/'});
+				this.$store.state.loading.show=false;
 			}
 		}
 	}

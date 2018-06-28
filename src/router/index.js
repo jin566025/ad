@@ -5,11 +5,11 @@ Vue.use(Router)
 
 export default new Router({
   routes: [
-    {path: '/login',component:() => import('@/views/login/login'),hidden: true},
+    {path: '/',component:() => import('@/views/login/login'),hidden: true},
     {
-    	path:'/',
+    	path:'/layout',
     	component:()=>import('@/views/layout/layout'),
-    	redirect: '/index',
+    	redirect: '/layout/index',
     	hidden: true,
 	    name: 'Layout',
 	    children:[

@@ -4,7 +4,7 @@
 		<h2>Sorry, the site now can not be accessed. </h2>
 		<font color="#666666">您请求访问的页面，暂时找不到，或者请求发生错误，我们建议您返回首页进行浏览，谢谢！</font><br /><br />
 		<div class="button">
-			 <router-link tag='a' :to="'/login'" >跳转返回</router-link>
+			 <router-link tag='a' :to="'/'" >跳转返回</router-link>
 		</div>
 	</div>
 </template>
