@@ -1,10 +1,19 @@
 <template>
 	<div class="main">
 		<div class="content">
-			<div class="title">发布时间：20180615  16:30:24</div>
+			<div class="title">发布时间：{{ time }}</div>
 			<div class="container clearfix">
 				<div class="container-left fl">
-					<p class="address">{{ provinceName }}-{{ cityName }}-{{ districtName }}-{{ siteName }}</p>
+					<p class="address">
+						<span class="provinceName">{{ provinceName }}</span>
+						<span :class="cityName ? '':'hide' ">-</span>
+						<span class="cityName" >{{  cityName }}</span>
+						<span :class="districtName ? '':'hide' ">-</span>
+						<span class="districtName" >{{ districtName }}</span>
+						<span :class="siteName ? '':'hide' ">-</span>
+						<span class="siteName"  >{{ siteName }}</span>
+						
+					</p>
 					<p class="section-name">红包名称：{{ name }}</p>
 					<p class="section-detail">
 						<span>随机部分：{{ randomAmount }}个</span>
@@ -33,14 +42,14 @@
 			</div>
 			<div class="table">
 				<div class="table-tr table-head clearfix">
-					<div class="table-td table-td1 fl">用户名</div>
+					<div class="table-td table-td1 fl">手机号</div>
 					<div class="table-td table-td2 fl">金额</div>
 					<div class="table-td table-td3 fl">领取时间</div>
 				</div>
 				<div class="table-tr table-tr2 clearfix" v-for="item in list">
 					<div class="table-td table-td1 fl">{{ item.userName }}</div>
 					<div class="table-td table-td2 fl">{{ item.money }}</div>
-					<div class="table-td table-td3 fl">{{ item.addTime }}</div>
+					<div class="table-td table-td3 fl">{{ formatDate(item.addTime) }}</div>
 				</div>
 				
 			</div>
@@ -67,7 +76,8 @@
 				img:"",
 				url:"",
 				number:"",
-				list:[]
+				list:[],
+				time:""
 			}
 		},
 		mounted(){
@@ -76,7 +86,13 @@
 				this.getList();
 			})
 		},
+		watch:{
+			 "$route": "reload"
+		},
 		methods:{
+			reload:function(){
+				location.reload();
+			},
 			getDetail:function(){
 				let detail = sessionStorage.getItem("dataArray");
 				detail = JSON.parse(detail);
@@ -94,6 +110,17 @@
 				this.url = detail.url;
 				this.img = detail.img;
 				this.number = detail.number;
+				this.time = detail.time
+			},
+			formatDate:function(now) { 
+				let data = new Date(now);
+				let year=data.getFullYear(); 
+				let month=data.getMonth()+1; 
+				let date=data.getDate(); 
+				let hour=data.getHours(); 
+				let minute=data.getMinutes(); 
+				let second=data.getSeconds(); 
+				return ""+year+"-"+month+"-"+date+" "+hour+":"+minute+":"+second; 
 			},
 			getList:function(){
 				let id = window.location.href.split("?id=")[1];
@@ -102,9 +129,9 @@
 					id:id,
 					type:type
 				};
-				console.log(params)
 				RedPacketRecordList(params).then((res)=>{
-					if(res.stateCode==0){
+					console.log(res);
+					if(res.data.stateCode==0){
 						this.list = res.data.data.list;
 					}
 				})

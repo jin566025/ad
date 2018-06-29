@@ -146,8 +146,8 @@
 						userInfo.hasLight = hasLight;
 						
 						userInfo = JSON.stringify(userInfo);
-						sessionStorage.setItem("userInfo",userInfo);
-						sessionStorage.setItem("adtype",1)
+						localStorage.setItem("userInfo",userInfo);
+						localStorage.setItem("adtype",1)
 						this.$router.push({'path':"/layout/index"})
 					}else if(res.data.stateCode===202){
 						this.usernameTip = res.data.msg;
@@ -214,8 +214,8 @@
 						userInfo.hasLight = hasLight;
 						
 						userInfo = JSON.stringify(userInfo);
-						sessionStorage.setItem("userInfo",userInfo);
-						sessionStorage.setItem("adtype",0)
+						localStorage.setItem("userInfo",userInfo);
+						localStorage.setItem("adtype",0)
 						this.$router.push({'path':"/layout/index"})
 					}else{
 						this.noMsg = true;

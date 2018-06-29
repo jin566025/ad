@@ -32,7 +32,7 @@
 					</p>
 					<p class="top-p" v-show="ad">
 						<span class="xing noxing">*</span>
-						<span class="name noxing">区域类型：</span>
+						<span class="name noxing">占个位置：</span>
 						<select class="selects2" ref="siteval" @change="selectArea($event)">
 							<option :value="item.id" v-for="(item,index) in site">{{ item.areaName }}</option>
 						</select>
@@ -83,15 +83,20 @@
 					<p class="top-p">
 						<span class="xing">*</span>
 						<span class="name">随机部分：</span>
-						<input v-model="redpackrandomAmount" class="link-input" type="text" placeholder="请输入红包数量" />
+						<input v-model="redpackrandomAmount" @change="compare();"  @keyup="NumberCheck();"  class="link-input" type="number" placeholder="请输入红包数量" />
 						<span class="type">个</span>
 					</p>
 					
 					<p class="top-p">
 						<span class="xing noxing">*</span>
 						<span class="name noxing">占个位置：</span>
-						<input v-model="redpackrandomMoney" v-on:input="totalMoney()" class="link-input" type="text" placeholder="金额" />
+						<input v-model="redpackrandomMoney" @change="compare();" v-on:input="totalMoney()" class="link-input" type="number" placeholder="金额" />
 						<span class="type">元</span>
+					</p>
+					<p class="top-p">
+						<span class="xing noxing">*</span>
+						<span class="name noxing">占个位置：</span>
+						<span class="tips">红包最低单个平均金额：<a class="tips2">{{ precent }}</a>  元。</span>
 					</p>
 					<p class="top-p">
 						<span class="xing noxing">*</span>
@@ -100,23 +105,28 @@
 					</p>
 					
 					<p class="top-p">
-						<span class="xing ">*</span>
+						<span class="xing noxing">*</span>
 						<span class="name">运气部分：</span>
-						<input v-model="redpackprobabilityAmount" class="link-input" type="text" placeholder="请输入红包数量" />
+						<input v-model="redpackprobabilityAmount" @change="compare();" @keyup="NumberCheck();" class="link-input" type="number" placeholder="请输入红包数量" />
 						<span class="type">个</span>
 					</p>
 					
 					<p class="top-p">
 						<span class="xing noxing">*</span>
 						<span class="name noxing">占个位置：</span>
-						<input v-model="redpackprobabilityMoney"v-on:input="totalMoney()" class="link-input" type="text" placeholder="金额" />
+						<input v-model="redpackprobabilityMoney" @change="compare();" v-on:input="totalMoney()" class="link-input" type="number" placeholder="金额" />
 						<span class="type">元</span>
 					</p>
 					<p class="top-p">
 						<span class="xing noxing">*</span>
 						<span class="name noxing">占个位置：</span>
-						<input v-model="redpackprobability" class="link-input" type="text" placeholder="概率（5~100）" />
+						<input v-model="redpackprobability" class="link-input" type="number" placeholder="概率（5~100）" />
 						<span class="type">%</span>
+					</p>
+					<p class="top-p">
+						<span class="xing noxing">*</span>
+						<span class="name noxing">占个位置：</span>
+						<span class="tips">红包最低单个平均金额：<a class="tips2">{{ precent }}</a>  元。</span>
 					</p>
 					<p class="top-p">
 						<span class="xing noxing">*</span>
@@ -133,8 +143,9 @@
 </template>
 
 <script>
-	import { saveRedPacket,redPacketPay } from '@/api/redpacket'
+	import { saveRedPacket,redPacketPay,verifyMoney } from '@/api/redpacket'
 	import { queryArea,getList,getSiteAmount } from '@/api/area'
+	import axios from 'axios'
 	export default{
 		data(){
 			return {
@@ -153,7 +164,10 @@
 				redpackprobabilityAmount:"", //概率红包数量
 				redpackprobability:"",  //概率
 				total:0,
-				SiteAmount:0
+				SiteAmount:0,
+				precent:0,
+				
+				type:""
 			}
 		},
 		mounted(){
@@ -163,7 +177,13 @@
 				this.getType();
 			})
 		},
+		watch:{
+			"$route": "reload",
+		},
 		methods:{
+			reload:function(){
+				location.reload();
+			},
 			getFile (e) {
 		        let _this = this
 		        let files = e.target.files[0]
@@ -174,6 +194,71 @@
 		          _this.src = this.result
 		        }
 		    },
+		    
+		    
+		    
+		    NumberCheck:function(){
+		        var num = event.target.value;
+		        var re=/^\d*$/;
+		        if(!re.test(num)){
+		            isNaN(parseInt(num))?event.target.value=" ":event.target.value=parseInt(num);
+		        }
+		    },
+		    compare:function(){
+		    	let val = event.target.value;
+		    	if(val<=0){
+		    		alert("需大于0");
+		    		if(this.redpackprobabilityMoney<=0){
+		    			this.redpackprobabilityMoney=""
+		    		}
+		    		if(this.redpackrandomMoney<=0){
+		    			this.redpackrandomMoney=""
+		    		}
+		    		if(this.redpackrandomAmount<=1){
+		    			this.redpackrandomAmount=""
+		    		}
+		    		if(this.redpackprobabilityAmount<=1){
+		    			this.redpackprobabilityAmount=""
+		    		}
+		    		this.totalMoney();
+		    	}
+		    	if(this.precent==0){
+		    		alert("请先选择省市区");
+		    		this.redpackrandomMoney = "";
+			    	this.redpackrandomAmount = "";
+			    	this.redpackprobabilityMoney = "";
+	    			this.redpackprobabilityAmount = "";
+			    	this.total = 0
+		    	}else{
+		    		let redpackrandomMoney = this.redpackrandomMoney;
+			    	let redpackrandomAmount = this.redpackrandomAmount;
+			    	let redpackprobabilityMoney = this.redpackprobabilityMoney;
+			    	let redpackprobabilityAmount = this.redpackprobabilityAmount;
+			    	let adtype = localStorage.getItem("adtype");
+			    	if(redpackrandomMoney && redpackrandomAmount){
+		    			let avr = redpackrandomMoney/redpackrandomAmount;
+		    			if(avr<this.precent){
+		    				alert("红包最低单个平均金额："+this.precent+" 元。");
+		    				this.redpackrandomMoney = "";
+					    	this.redpackrandomAmount = "";
+					    	this.total = 0
+		    			}
+		    			
+		    		}
+			    	if(redpackprobabilityMoney && redpackprobabilityAmount){
+		    			let avr = redpackprobabilityMoney/redpackprobabilityAmount;
+		    			if(avr<this.precent){
+		    				alert("红包最低单个平均金额："+this.precent+" 元。");
+		    				this.redpackprobabilityMoney = "";
+					    	this.redpackprobabilityAmount = "";
+					    	this.total = 0
+		    			}
+		    			
+		    		}
+		    	}
+		    },
+		    
+		    
 		    totalMoney:function(){
 		    	let randomMoney = parseFloat(this.redpackrandomMoney);
 		    	let probabilityMoney = parseFloat(this.redpackprobabilityMoney);
@@ -192,8 +277,11 @@
 		   	 //  this.$router.push({'path':'pay'})
 		    },
 		    getType:function(){
-		    	let adtype = sessionStorage.getItem("adtype");
-		    	adtype==0 ? this.ad=true:this.ad=false
+		    	let adtype = localStorage.getItem("adtype");
+		    	console.log(adtype);
+		    	this.type = adtype;
+		    	adtype==0 ? this.ad=true:this.ad=false;
+		    	adtype==0 ? this.precent=0.0:this.precent=0.01;
 		    },
 		    queryProvince:function(areaId){
 		    	let dataArray = {};
@@ -201,6 +289,7 @@
 		    		dataArray.areaId = areaId
 		    	}
 		    	queryArea(dataArray).then((res)=>{
+		    		console.log(res)
 		    		if(res.data.stateCode===0){
 		    			
 		   				let list =  res.data.areaList;
@@ -208,10 +297,7 @@
 		   			}
 		    	})
 		    },
-		    selectArea:function(event){
-		    	let siteId = event.target.value;
-		    	console.log(siteId)
-		    },
+
 		    selectProvince:function(event){
 		    	this.city = [];
 		    	this.area = [];
@@ -249,9 +335,28 @@
 		    	})
 		    },
 		    selectArea:function(event){
-		    	this.site = [];
-		    	this.$refs.sites.value="";
-		    	this.$refs.sites.text="请选择区域类型";
+		    	let siteId = event.target.value;
+
+		    	let provinceId = this.$refs.provinceval.value;
+		    	let cityId = this.$refs.cityval.value;
+		    	let districtId = this.$refs.areaval.value;
+		    	let params = {
+		    		provinceId:provinceId,
+		    		cityId:cityId,
+		    		districtId:districtId
+		    	}
+		    	verifyMoney(params).then((res)=>{
+		    		console.log(res)
+		    		if(res.data.stateCode==0){
+		    			let average = parseFloat(res.data.data.average);
+		    			let user =parseFloat(res.data.data.user/100);
+		    			
+		    			let precent = (average/user).toFixed(2);
+		    			precent = parseFloat(precent);
+		    			precent<0.05 ? precent=0.05:precent=precent;
+		    			this.precent = precent;
+		    		}
+		    	})
 		    },
 		    selectSite:function(event){
 		    	let site = event.target.value;
@@ -303,19 +408,8 @@
 		    		alert("请填写红包名称！");
 		    		return false;
 		    	}
-		    	let redpackurl = this.redpackurl;
-		    	if(redpackurl==""){
-		    		alert("请输入广告链接！");
-		    		return false;
-		    	}
-		    	let redpackprobability = this.redpackprobability;
-		    	if(redpackprobability==""){
-		    		alert("请输入运气红包概率！");
-		    		return false;
-		    	}else if(redpackprobability>100 || redpackprobability<5){
-		    		alert("运气红包概率应大于5且小于100！");
-		    		return false;
-		    	}
+		    	
+		    	
 		    	let redpackrandomMoney = this.redpackrandomMoney;
 		    	if(redpackrandomMoney==""){
 		    		alert("请填写随机红包金额！");
@@ -326,23 +420,57 @@
 		    		alert("请填写随机红包数量！");
 		    		return false;
 		    	}
+		    	
+		    	
 		    	let redpackprobabilityMoney = this.redpackprobabilityMoney;
-		    	if(redpackprobabilityMoney==""){
-		    		alert("请填写概率红包金额！");
-		    		return false;
-		    	}
 		    	let redpackprobabilityAmount = this.redpackprobabilityAmount;
-		    	if(redpackprobabilityAmount==""){
-		    		alert("请填写概率红包数量！");
-		    		return false;
+		    	let redpackprobability = this.redpackprobability;
+		    	
+		    	if(redpackprobabilityMoney || redpackprobabilityAmount || redpackprobability){
+		    		if(redpackprobabilityMoney==""){
+			    		alert("请填写运气部分金额！");
+			    		return false;
+			    	}
+		    		if(redpackprobabilityAmount==""){
+			    		alert("请填写运气部分数量！");
+			    		return false;
+			    	}
+		    		if(redpackprobability==""){
+			    		alert("请输入运气红包概率！");
+			    		return false;
+			    	}else if(redpackprobability>100 || redpackprobability<5){
+			    		alert("运气红包概率应大于5且小于100！");
+			    		return false;
+			    	}
 		    	}
+		    	
+		    	if(redpackprobabilityMoney==""){
+		    		formData.append("probabilityMoney",0);
+		    	}else{
+		    		formData.append("probabilityMoney",redpackprobabilityMoney);
+		    	}
+		    	
+		    	if(redpackprobabilityAmount==""){
+		    		formData.append("probabilityAmount",0);
+		    	}else{
+		    		formData.append("probabilityAmount",redpackprobabilityAmount);
+		    	}
+		    	
+		    	if(redpackprobability==""){
+		    		formData.append("probability",0);
+		    	}else{
+		    		formData.append("probability",redpackprobability);
+		    	}
+		    	
+		    	
+		    	
 		    	let positivePic = this.$refs.file.files[0];
 		    	if(!positivePic){
 		    		alert("请上传图片！");
 		    		return false;
 		    	}
 		    	
-		    	let userInfo = sessionStorage.getItem("userInfo");
+		    	let userInfo = localStorage.getItem("userInfo");
 		    	userInfo = JSON.parse(userInfo);
 		    	let userId = userInfo.userId;
 		    	
@@ -352,43 +480,66 @@
 		    		return false;
 		    	}
 		    	
-		    	let cityId = this.$refs.cityval.value;
-		    	if(cityId){
-		    		formData.append("cityId",cityId);
-		    	}
-		    	let districtId = this.$refs.areaval.value;
-		    	if(districtId){
-		    		formData.append("districtId",districtId);
-		    	}
 		    	
-		    	let type = sessionStorage.getItem("adtype");
+		    	let type = localStorage.getItem("adtype");
 		    	
 		    	
 		    	formData.append("name",redpackname);
-		    	formData.append("url",redpackurl);
+		    	
 		    	formData.append("probability",redpackprobability);
 		    	formData.append("randomMoney",redpackrandomMoney);
 		    	formData.append("randomAmount",redpackrandomAmount);
-		    	formData.append("probabilityMoney",redpackprobabilityMoney);
+		    	
 		    	formData.append("probabilityAmount",redpackprobabilityAmount);
 		    	formData.append("userId",userId);
 		    	formData.append("provinceId",provinceId);
 				formData.append("type",type);
 				formData.append("positivePic",positivePic);
 				
+				let redpackurl = this.redpackurl;
+		    	if(redpackurl){
+		    		formData.append("url",redpackurl);
+		    	}
 				
-				
+		    	let cityId = this.$refs.cityval.value;
+		    	let districtId = this.$refs.areaval.value;
 		    	let siteId = this.$refs.siteval.value;
+		    	
 		    	if(type==0){
+		    		if(cityId){
+			    		formData.append("cityId",cityId);
+			    	}else{
+		    			alert("请选择城市");
+		    			return false;
+		    		}
+			    	
+			    	if(districtId){
+			    		formData.append("districtId",districtId);
+			    	}else{
+			    		alert("请选择区县");
+		    			return false;
+			    	}
+			    	
 		    		if(siteId){
 		    			formData.append("siteId",siteId);
 		    		}else{
-		    			alert("请选择区域类型")
+		    			alert("请选择区域类型");
+		    			return false;
+		    		}
+		    	}else{
+		    		if(cityId){
+			    		formData.append("cityId",cityId);
+			    	}	
+			    	if(districtId){
+			    		formData.append("districtId",districtId);
+			    	}
+			    	if(siteId){
+		    			formData.append("siteId",siteId);
 		    		}
 		    	}
 		
 
-				this.$ajax.post("http://101.37.163.225:8888/JKMarket/rest/mall/order/saveRedPacket.json",formData).then(res => { 
+				axios.post("http://ytg.sunruncn.com:8888/JKMarket/rest/mall/order/saveRedPacket.json",formData).then(res => { 
 					console.log(res)
 					if(res.data.stateCode==0){
 						if(type==0){
@@ -444,7 +595,10 @@
 					}
 					.input-file{opacity: 0;height: 30px;width: 110px;cursor: pointer;}
 					.upimg{position: absolute;bottom: 0;width: 110px;height: 30px;left:105px;z-index: -1;cursor: pointer;}
-					.tips{font-size: 12px;font-family: Roboto;color: #323232 ;}
+					.tips{
+						font-size: 12px;font-family: Roboto;color: #323232 ;
+						.tips2{color: #FF2828;}
+					}
 					.type{font-family: Roboto;font-size: 12px;margin-left: 10px;}
 				}
 				.top-p2{

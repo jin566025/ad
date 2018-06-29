@@ -4,15 +4,15 @@ import router from '@/router'
 
 const service = axios.create({
 	//baseURL: process.env.BASE_API, // api的base_url
-//	baseURL:"http://192.168.100.54:8888/JKMarket/rest",
-	baseURL:"http://101.37.163.225:8888/JKMarket/rest",
+	baseURL:"http://ytg.sunruncn.com:8888/JKMarket/rest",
+//	baseURL:"http://101.37.163.225:8888/JKMarket/rest",
 	  timeout: 10000000 // 请求超时时间
 })
 
 
 
 service.interceptors.request.use(function (config) {  //配置发送请求的信息
-	var userInfo = sessionStorage.getItem("userInfo");
+	var userInfo = localStorage.getItem("userInfo");
 	if(!userInfo){
 		router.push({'path':'/'});
 	}

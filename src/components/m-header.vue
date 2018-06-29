@@ -15,7 +15,8 @@
 				this.$router.push({'path':'/layout/index'})
 			},
 			logout:function(){
-				sessionStorage.removeItem("userInfo");
+				localStorage.removeItem("userInfo");
+				localStorage.removeItem("adtype")
 				this.$router.push({'path':'/'});
 				this.$store.state.loading.show=false;
 			}

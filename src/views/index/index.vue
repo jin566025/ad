@@ -6,9 +6,17 @@
 				<div class="title">历史红包记录：</div>
 				<div v-if="hasData">
 					<div class="section" @click="toDetail(item.id,$event)" v-for="item in adList">
-						<div class="section-title">发布时间：没返回</div>
+						<div class="section-title">发布时间：<span class="time">{{ formatDate(item.addTime) }}</span></div>
 						<div class="section-content">
-							<p class="section-content-title"><span class="provinceName">{{ item.provinceName }}</span>-<span class="cityName">{{ item.cityName }}</span>-<span class="districtName">{{ item.districtName }}</span>-<span class="siteName">{{ item.siteName }}</span></p>
+							<p class="section-content-title">
+								<span class="provinceName">{{ item.provinceName }}</span>
+								<span :class="item.cityName ? '':'hide' ">-</span>
+								<span class="cityName" >{{ item.cityName }}</span>
+								<span :class="item.districtName ? '':'hide' ">-</span>
+								<span class="districtName" >{{ item.districtName }}</span>
+								<span :class="item.siteName ? '':'hide' ">-</span>
+								<span class="siteName"  >{{ item.siteName }}</span>
+							</p>
 							<div class="section-main clearfix">
 								<div class="section-left fl">
 									<p class="section-name">红包名称：<span class="name">{{ item.name }}</span></p>
@@ -22,13 +30,13 @@
 										<span class="section-span">概率：<a class="probability">{{ item.probability }}</a>%</span>
 									</p>
 									<p class="section-detail">
-										<span>总金额：<a class="count">{{ item.count }}</a>元</span>
+										<span>总金额：<a class="count">{{ item.randomMoney+item.probabilityMoney }}</a>元</span>
 										<span class="img">{{ item.img }}</span>
 										<span class="url">{{ item.url }}</span>
 									</p>
 								</div>
 								<div class="section-right fr">
-									<p class="p-number number">无</p>
+									<p class="p-number number">{{ item.count? item.count:0 }}</p>
 									<p class="p-number2">已领取人次</p>
 								</div>
 							</div>
@@ -68,6 +76,16 @@
 			})
 		},
 		methods:{
+			formatDate:function(now) { 
+				let data = new Date(now);
+				let year=data.getFullYear(); 
+				let month=data.getMonth()+1; 
+				let date=data.getDate(); 
+				let hour=data.getHours(); 
+				let minute=data.getMinutes(); 
+				let second=data.getSeconds(); 
+				return ""+year+"-"+month+"-"+date+" "+hour+":"+minute+":"+second; 
+			},
 			toDetail:function(id,event){
 				let target = event.currentTarget;
 				let provinceName = target.getElementsByClassName("provinceName")[0].innerText;
@@ -84,6 +102,7 @@
 				let img = target.getElementsByClassName("img")[0].innerText;
 				let url = target.getElementsByClassName("url")[0].innerText;
 				let number = target.getElementsByClassName("number")[0].innerText;
+				let time = target.getElementsByClassName("time")[0].innerText;
 				let dataArray = {
 					provinceName:provinceName,
 					cityName:cityName,
@@ -98,7 +117,8 @@
 					count:count,
 					img:img,
 					url:url,
-					number:number
+					number:number,
+					time:time
 				}
 				dataArray = JSON.stringify(dataArray);
 				sessionStorage.setItem("dataArray",dataArray);
@@ -108,7 +128,7 @@
 				this.$router.push({'path':'send'})
 			},
 			getList:function(){
-				let userInfo = sessionStorage.getItem("userInfo");
+				let userInfo = localStorage.getItem("userInfo");
 				userInfo = JSON.parse(userInfo);
 				let userId = userInfo.userId;
 				let params = {};
@@ -123,11 +143,17 @@
 					}
 				})
 
+			},
+			reload:function(){
+				location.reload();
 			}
 		},
 		components:{
 			Banner
-		}
+		},
+		watch:{
+			 "$route": "reload"
+		},
 	}
 </script>
 

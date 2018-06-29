@@ -32,3 +32,11 @@ export function RedPacketRecordList(data){
 	    params:data,
 	})
 }
+
+export function verifyMoney(data){
+	return request({
+		url:"/mall/verifyMoney.json",
+		method: 'post',
+	    params:data,
+	})
+}
