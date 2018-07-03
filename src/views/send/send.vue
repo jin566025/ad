@@ -47,7 +47,7 @@
 					<p class="top-p">
 						<span class="xing noxing">*</span>
 						<span class="name">广告链接：</span>
-						<input v-model="redpackurl" class="link-input" type="text" placeholder="请输入链接地址" />
+						<input v-model="redpackurl" class="link-input" type="text" placeholder="请输入链接地址，必须以http://或https://开头" />
 					</p>
 					<p class="top-p top-p2 clearfix">
 						<span class="xing xing2">*</span>
@@ -156,7 +156,7 @@
 				area:[],
 				site:[],
 				redpackname:"",         //名称
-				redpackurl:"",          //广告链接
+				redpackurl:"https://",          //广告链接
 				
 				redpackrandomMoney:"",  //随机红包
 				redpackrandomAmount:"", //随机红包数量
@@ -165,7 +165,7 @@
 				redpackprobability:"",  //概率
 				total:0,
 				SiteAmount:0,
-				precent:0,
+				precent:0.01,
 				
 				type:""
 			}
@@ -234,7 +234,7 @@
 			    	let redpackrandomAmount = this.redpackrandomAmount;
 			    	let redpackprobabilityMoney = this.redpackprobabilityMoney;
 			    	let redpackprobabilityAmount = this.redpackprobabilityAmount;
-			    	let adtype = localStorage.getItem("adtype");
+			    	let adtype = sessionStorage.getItem("adtype");
 			    	if(redpackrandomMoney && redpackrandomAmount){
 		    			let avr = redpackrandomMoney/redpackrandomAmount;
 		    			if(avr<this.precent){
@@ -277,11 +277,9 @@
 		   	 //  this.$router.push({'path':'pay'})
 		    },
 		    getType:function(){
-		    	let adtype = localStorage.getItem("adtype");
-		    	console.log(adtype);
+		    	let adtype = sessionStorage.getItem("adtype");
 		    	this.type = adtype;
 		    	adtype==0 ? this.ad=true:this.ad=false;
-		    	adtype==0 ? this.precent=0.0:this.precent=0.01;
 		    },
 		    queryProvince:function(areaId){
 		    	let dataArray = {};
@@ -297,7 +295,6 @@
 		   			}
 		    	})
 		    },
-
 		    selectProvince:function(event){
 		    	this.city = [];
 		    	this.area = [];
@@ -336,7 +333,9 @@
 		    },
 		    selectArea:function(event){
 		    	let siteId = event.target.value;
-
+		    	this.site = [];
+		    	this.$refs.sites.value="";
+		    	this.$refs.sites.text="请选择区域类型";
 		    	let provinceId = this.$refs.provinceval.value;
 		    	let cityId = this.$refs.cityval.value;
 		    	let districtId = this.$refs.areaval.value;
@@ -345,18 +344,24 @@
 		    		cityId:cityId,
 		    		districtId:districtId
 		    	}
-		    	verifyMoney(params).then((res)=>{
-		    		console.log(res)
-		    		if(res.data.stateCode==0){
-		    			let average = parseFloat(res.data.data.average);
-		    			let user =parseFloat(res.data.data.user/100);
-		    			
-		    			let precent = (average/user).toFixed(2);
-		    			precent = parseFloat(precent);
-		    			precent<0.05 ? precent=0.05:precent=precent;
-		    			this.precent = precent;
-		    		}
-		    	})
+		    	if(this.type==0){
+		    		verifyMoney(params).then((res)=>{
+		    		
+			    		if(res.data.stateCode==0){
+			    			let average = parseFloat(res.data.data.average);
+			    			let user =parseFloat(res.data.data.user/100);
+			    			
+			    			// precent = (average/user).toFixed(2);
+			    			let precent = parseFloat((average/user)+0.005);
+			    			//precent<0.05 ? precent=0.05:precent=precent;
+			    			
+			    			this.precent = precent.toFixed(2);
+			    			
+			    			
+			    		}
+			    	})
+		    	}
+		    	
 		    },
 		    selectSite:function(event){
 		    	let site = event.target.value;
@@ -470,7 +475,7 @@
 		    		return false;
 		    	}
 		    	
-		    	let userInfo = localStorage.getItem("userInfo");
+		    	let userInfo = sessionStorage.getItem("userInfo");
 		    	userInfo = JSON.parse(userInfo);
 		    	let userId = userInfo.userId;
 		    	
@@ -481,7 +486,7 @@
 		    	}
 		    	
 		    	
-		    	let type = localStorage.getItem("adtype");
+		    	let type = sessionStorage.getItem("adtype");
 		    	
 		    	
 		    	formData.append("name",redpackname);
@@ -498,7 +503,13 @@
 				
 				let redpackurl = this.redpackurl;
 		    	if(redpackurl){
-		    		formData.append("url",redpackurl);
+		    		if(redpackurl.substr(0,7)=="http://" || redpackurl.substr(0,7)=="https://"){
+		    			formData.append("url",redpackurl);
+		    		}else{
+		    			alert("链接地址必须以http://或https://开头");
+		    			return false;
+		    		}
+		    		
 		    	}
 				
 		    	let cityId = this.$refs.cityval.value;
@@ -538,7 +549,6 @@
 		    		}
 		    	}
 		
-
 				axios.post("http://ytg.sunruncn.com:8888/JKMarket/rest/mall/order/saveRedPacket.json",formData).then(res => { 
 					console.log(res)
 					if(res.data.stateCode==0){
@@ -549,6 +559,7 @@
 								if(res.data.stateCode==0){
 									document.getElementById("app").innerHTML = res.data.aliPayString
 									document.forms[0].submit();
+									
 								}
 							})
 						}else{
@@ -559,7 +570,6 @@
 						alert(res.data.msg)
 					}
 				})
-
 		    }
 		    
 		}
@@ -567,7 +577,6 @@
 </script>
 
 <style lang="less" rel="stylesheet/less" scoped>
-
 .main{
 	width: 1440px;margin: 0 auto;
 	.content{
