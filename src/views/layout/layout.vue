@@ -1,16 +1,21 @@
 <template>
 	<div>
-		<m-header></m-header>
+		<m-header :logshow="logshow"></m-header>
 	
-		<keep-alive>
+		
 		  <router-view></router-view>
-	    </keep-alive>
+	    
 	</div>
 </template>
 
 <script>
 	import MHeader from '@/components/m-header'
 	export default{
+		data(){
+			return {
+				logshow:true
+			}
+		},
 		components:{
 			MHeader
 		}

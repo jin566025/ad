@@ -178,7 +178,7 @@
 			})
 		},
 		watch:{
-			"$route": "reload",
+			//"$route": "reload",
 		},
 		methods:{
 			reload:function(){

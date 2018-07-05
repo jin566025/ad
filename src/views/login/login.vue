@@ -1,5 +1,6 @@
 <template>
 	<div class="container">
+		<m-header :logshow="logshow"></m-header>
 		<loading></loading>
 		<div class="main">
 			<div class="content clearfix">
@@ -66,6 +67,7 @@
 
 <script>
 	import Loading from '@/components/loading'
+	import MHeader from '@/components/m-header'
 	import { getMsg,login1,login22 } from '@/api/login'
 	export default{
 		data(){
@@ -82,11 +84,13 @@
 				nopassword:false,
 				usernameTip:"请输入账号",
 				passwordTip:"请输入正确的密码",
+				logshow:false
 
 			}
 		},
 		components:{
-			Loading
+			Loading,
+			MHeader
 		},
 		methods:{
 			change:function(){
@@ -259,7 +263,7 @@
 .container{
 	width: 100%;height: 100vh;background-color: #ADDFEA;
 	.main{
-		width: 1440px;margin: 0 auto;height: 100%;
+		width: 1440px;margin: 0 auto;
 		.content{
 			padding-top: 274px;height: 340px;
 			.banner{width: 910px;}

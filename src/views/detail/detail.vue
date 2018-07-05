@@ -87,7 +87,7 @@
 			})
 		},
 		watch:{
-			 "$route": "reload"
+			// "$route": "reload"
 		},
 		methods:{
 			reload:function(){
@@ -116,10 +116,15 @@
 				let data = new Date(now);
 				let year=data.getFullYear(); 
 				let month=data.getMonth()+1; 
+				month<10 ? month = "0"+month:month=month;
 				let date=data.getDate(); 
+				date<10 ? date = "0"+date:date=date;
 				let hour=data.getHours(); 
+				hour<10 ? hour = "0"+hour:hour=hour;
 				let minute=data.getMinutes(); 
+				minute<10 ? minute = "0"+minute:minute=minute;
 				let second=data.getSeconds(); 
+				second<10 ? second = "0"+second:second=second;
 				return ""+year+"-"+month+"-"+date+" "+hour+":"+minute+":"+second; 
 			},
 			getList:function(){
