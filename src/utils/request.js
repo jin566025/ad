@@ -12,7 +12,7 @@ const service = axios.create({
 
 
 service.interceptors.request.use(function (config) {  //配置发送请求的信息
-	var userInfo = localStorage.getItem("userInfo");
+	var userInfo = sessionStorage.getItem("userInfo");
 	if(!userInfo){
 		router.push({'path':'/'});
 	}

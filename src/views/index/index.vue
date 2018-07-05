@@ -133,7 +133,7 @@
 				this.$router.push({'path':'send'})
 			},
 			getList:function(){
-				let userInfo = localStorage.getItem("userInfo");
+				let userInfo = sessionStorage.getItem("userInfo");
 				userInfo = JSON.parse(userInfo);
 				let userId = userInfo.userId;
 				let params = {};
