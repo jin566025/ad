@@ -4,7 +4,7 @@
 		<loading></loading>
 		<div class="main">
 			<div class="content clearfix">
-				<img class="banner fl"    src="../../../static/img/login-banner.png" />
+				<img class="banner fl"    src="../../../static/img/login-banner.png" style="visibility: hidden;" />
 				<div class="login fl" v-if="login1">
 					<div class="login-content clearfix">
 						<p  class="login-title fl">广告商登录</p>
@@ -262,6 +262,8 @@
 <style lang="less" rel="stylesheet/less" scoped>
 .container{
 	width: 100%;height: 100vh;background-color: #ADDFEA;
+	background-image: url(../../../static/img/banner.jpg);background-repeat: no-repeat;background-position: center;background-size: 100% 100%;
+
 	.main{
 		width: 1440px;margin: 0 auto;
 		.content{

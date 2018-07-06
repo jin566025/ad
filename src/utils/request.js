@@ -4,7 +4,7 @@ import router from '@/router'
 
 const service = axios.create({
 	//baseURL: process.env.BASE_API, // api的base_url
-	baseURL:"http://ytg.sunruncn.com:8888/JKMarket/rest",
+	baseURL:"http://open.sunruncn.com:8888/JKMarket/rest",
 //	baseURL:"http://101.37.163.225:8888/JKMarket/rest",
 	  timeout: 10000000 // 请求超时时间
 })

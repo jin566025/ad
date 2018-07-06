@@ -1,5 +1,6 @@
 <template>
 	<div class="main">
+		<loading></loading>
 		<div class="content">
 			<div class="container">
 				<p class="title">填写区域：</p>
@@ -136,7 +137,7 @@
 				</div>
 				
 				<p class="amount">总金额：<span v-html="total" ></span>元</p>
-				<div class="finish" @click="saveRedPacket()">确认</div>
+				<button class="finish" @click="saveRedPacket($event)" :disabled="isDisable">确认</button>
 			</div>
 		</div>
 	</div>
@@ -145,6 +146,7 @@
 <script>
 	import { saveRedPacket,redPacketPay,verifyMoney } from '@/api/redpacket'
 	import { queryArea,getList,getSiteAmount } from '@/api/area'
+	import Loading from '@/components/loading'
 	import axios from 'axios'
 	export default{
 		data(){
@@ -167,7 +169,8 @@
 				SiteAmount:0,
 				precent:0.01,
 				
-				type:""
+				type:"",
+				isDisable:false
 			}
 		},
 		mounted(){
@@ -179,6 +182,9 @@
 		},
 		watch:{
 			//"$route": "reload",
+		},
+		components:{
+			Loading
 		},
 		methods:{
 			reload:function(){
@@ -299,6 +305,7 @@
 		    	this.city = [];
 		    	this.area = [];
 		    	this.site = [];
+		    	this.precent = 0.01;
 		    	this.$refs.sites.value="";
 		    	this.$refs.sites.text="请选择区域类型";
 		    	let areaId = event.target.value;
@@ -317,6 +324,7 @@
 		    selectCity:function(event){
 		    	this.area = [];
 		    	this.site = [];
+		    	this.precent = 0.01;
 		    	let areaId = event.target.value;
 		    	this.$refs.sites.value="";
 		    	this.$refs.sites.text="请选择区域类型";
@@ -407,7 +415,13 @@
 		    	})
 		    },
 		    saveRedPacket:function(){
-		    	let redpackname = this.redpackname;
+		    	
+		    	this.isDisable = true
+			    setTimeout(() => {
+			       this.isDisable = false
+			    }, 3000)
+				
+				let redpackname = this.redpackname;
 		    	let formData  = new FormData();
 		    	if(redpackname==""){
 		    		alert("请填写红包名称！");
@@ -503,7 +517,7 @@
 				
 				let redpackurl = this.redpackurl;
 		    	if(redpackurl){
-		    		if(redpackurl.substr(0,7)=="http://" || redpackurl.substr(0,7)=="https://"){
+		    		if(redpackurl.substr(0,7)=="http://" || redpackurl.substr(0,8)=="https://"){
 		    			formData.append("url",redpackurl);
 		    		}else{
 		    			alert("链接地址必须以http://或https://开头");
@@ -548,10 +562,11 @@
 		    			formData.append("siteId",siteId);
 		    		}
 		    	}
-		
-				axios.post("http://ytg.sunruncn.com:8888/JKMarket/rest/mall/order/saveRedPacket.json",formData).then(res => { 
+		this.$store.state.loading.show=true;
+				axios.post("http://open.sunruncn.com:8888/JKMarket/rest/mall/order/saveRedPacket.json",formData).then(res => { 
 					console.log(res)
 					if(res.data.stateCode==0){
+						this.$store.state.loading.show=false;
 						if(type==0){
 							let params = {};
 							params.outSn = res.data.outSn;
@@ -600,7 +615,7 @@
 					.moban{
 						width:375px;display: inline-block;position: relative;
 						.moban-img{width: 375px;}
-						.moban-img2{width:250px;}
+						.moban-img2{width:250px;max-height: 444px;}
 					}
 					.input-file{opacity: 0;height: 30px;width: 110px;cursor: pointer;}
 					.upimg{position: absolute;bottom: 0;width: 110px;height: 30px;left:105px;z-index: -1;cursor: pointer;}
@@ -620,7 +635,7 @@
 			}
 			.split{height: 3px;width: 100%;border-top: 1px dashed #DCDCDC;margin-top: 30px;margin-bottom: 50px;}
 			.amount{font-family: Roboto;font-size:24px;color: #323232;text-align: center;margin-top:40px;}
-			.finish{width: 336px;height: 46px;line-height: 46px;text-align: center;margin: 0 auto;background-color: #FFD801;color: #1E1E1E ;font-size: 18px;font-family: Microsoft Yahei;margin-top: 20px;cursor: pointer;border-radius: 5px;}
+			.finish{display: block;border: none;width: 336px;height: 46px;line-height: 46px;text-align: center;margin: 0 auto;background-color: #FFD801;color: #1E1E1E ;font-size: 18px;font-family: Microsoft Yahei;margin-top: 20px;cursor: pointer;border-radius: 5px;}
 		}
 	}
 }

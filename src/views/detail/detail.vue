@@ -146,7 +146,7 @@
 </script>
 
 <style lang="less" rel="stylesheet/less" scoped>
-.img{z-index: 999;width: 250px;}
+.img{z-index: 999;width: 250px;max-height: 440px;}
 .main{
 	width: 1440px;margin: 0 auto;
 	.content{
@@ -164,7 +164,7 @@
 				}
 				.hrs{height: 3px;width: 525px;border-top: 1px dashed gainsboro;margin-top: 40px;margin-bottom: 45px;}
 				.links{font-size: 14px;font-family: Roboto;color: #1E1E1E ;line-height: 20px;}
-				.links2{height: 125px;}
+				.links2{min-height: 125px;word-wrap:break-word;word-break:break-all;}
 				.p-number{color: #FF2828;width: 102px;text-align: center;}
 				.p-number1{font-size: 38px;margin-top: 60px;}
 				.p-number2{font-size: 20px;margin-top: 22px;}

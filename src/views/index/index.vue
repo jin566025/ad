@@ -157,7 +157,7 @@
 			Banner
 		},
 		watch:{
-			 //"$route": "reload"
+			 "$route": "reload"
 		},
 	}
 </script>

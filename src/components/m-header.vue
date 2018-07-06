@@ -2,7 +2,8 @@
 	<div class="container2">
 		<div class="main clearfix">
 			<img src="../../static/img/logo.png" class="logo fl" />
-			<span class="fl index" @click="toIndex()">首页</span>
+			<span class="fl index" @click="toIndex()" v-if="logshow">首页</span>
+			<span class="fl index"  v-else>开门有福</span>
 			<span v-show="logshow" class="fr logout" @click="logout()">退出登录</span>
 		</div>
 	</div>
